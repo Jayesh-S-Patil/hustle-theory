@@ -1,0 +1,38 @@
+<!doctype html>
+<html>
+  <head>
+    <title>Login / Sign Up | Hustle Theory</title>
+    <link rel="stylesheet" href="assets/css/style.css" />
+  </head>
+  <body class="auth-page">
+    <div class="auth-box">
+      <div id="loginView" class="auth-view active">
+        <h1>Hustle Theory</h1>
+        <p>Login to start your learning journey</p>
+        <form
+          onsubmit="
+            login();
+            return false;
+          "
+        >
+          <input type="text" id="loginUser" placeholder="Username" />
+          <input type="password" id="loginPass" placeholder="Password" />
+          <button type="submit">Login</button>
+        </form>
+        <div class="auth-link">
+          <a href="#" onclick="showSignup()">Create Account</a>
+        </div>
+      </div>
+      <div id="signupView" class="auth-view">
+        <h1>Create Account</h1>
+        <input type="text" id="signupUser" placeholder="Username" />
+        <input type="password" id="signupPass" placeholder="Password" />
+        <button onclick="createAccount()">Sign Up</button>
+        <div class="auth-link">
+          Already have an account? <a href="#" onclick="showLogin()">Login</a>
+        </div>
+      </div>
+    </div>
+    <script src="assets/js/auth.js"></script>
+  </body>
+</html>

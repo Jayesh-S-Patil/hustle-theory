@@ -32,6 +32,18 @@ for table in tables:
     cursor.execute(f"SELECT COUNT(*) FROM {table_name};")
     count = cursor.fetchone()[0]
     print(f"\nTotal rows: {count}")
+    
+    # Show sample rows
+    if count > 0:
+        cursor.execute(f"SELECT * FROM {table_name} LIMIT 3;")
+        rows = cursor.fetchall()
+        
+        print("\nSample rows:")
+        for row in rows:
+            print(f"  {row}")
+    else:
+        print("[EMPTY] No data in this table")
+    
     print()
 
 

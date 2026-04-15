@@ -1,4 +1,8 @@
 /* css style file */
+html {
+  scroll-behavior: smooth;
+}
+
 body {
   font-family: "Comic Sans MS", "Baloo 2", system-ui, sans-serif;
   margin: 0;
@@ -263,7 +267,11 @@ body.dashboard-page {
   padding: 15px 40px;
   display: flex;
   justify-content: space-between;
+  align-items: center;
   box-shadow: 0 8px 20px rgba(102, 126, 234, 0.2);
+  position: sticky;
+  top: 0;
+  z-index: 999;
 }
 
 .navbar b {
@@ -271,31 +279,52 @@ body.dashboard-page {
   text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
 }
 
+.nav-links {
+  display: flex;
+  gap: 30px;
+  align-items: center;
+}
+
 .nav-links a {
-  margin-left: 20px;
   color: white;
   text-decoration: none;
   font-weight: bold;
   transition: all 0.3s ease;
+  padding: 8px 12px;
+  border-radius: 5px;
 }
 
 .nav-links a:hover {
   text-decoration: underline;
   text-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.nav-links a.active {
+  background: rgba(255, 255, 255, 0.2);
+  border-bottom: 3px solid #00f2fe;
+}
+
+.nav-links a.nav-center {
+  order: -1;
+  margin-right: auto;
+  font-size: 14px;
 }
 
 .nav-links button {
-  margin-left: 20px;
-  padding: 6px 12px;
+  padding: 8px 16px;
   border: none;
   background: #ef4444;
   color: white;
   border-radius: 5px;
   cursor: pointer;
+  font-weight: bold;
+  transition: all 0.3s ease;
 }
 
-.nav-links a:hover {
-  text-decoration: underline;
+.nav-links button:hover {
+  background: #dc2626;
+  transform: scale(1.05);
 }
 
 .hero {

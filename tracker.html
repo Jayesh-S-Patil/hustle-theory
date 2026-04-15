@@ -6,6 +6,20 @@
   </head>
 
   <body class="tracker-page">
+    <!-- Navbar -->
+    <div class="navbar">
+      <div><b>Hustle Theory</b></div>
+      <div class="nav-links">
+        <a href="index.html#home" class="nav-center">Home</a>
+        <a href="index.html#progress">Progress</a>
+        <a href="index.html#modules">Modules</a>
+        <a href="index.html#rewards">Rewards</a>
+        <a href="wallet.html">E-Wallet</a>
+        <a href="tracker.html" class="active">Tracker</a>
+        <button onclick="logout()">Logout</button>
+      </div>
+    </div>
+
     <!-- Smart Owl Mascot -->
     <div class="mascot bottom-right" onclick="mascotSpeak()">
       <div class="mascot-icon">🦉</div>
@@ -56,13 +70,19 @@
 
     <script src="assets/js/tracker.js"></script>
     <script>
+      function logout() {
+        localStorage.removeItem("loggedInUser");
+        localStorage.removeItem("userId");
+        window.location.href = "auth.html";
+      }
+
       function mascotSpeak() {
         const messages = [
           "Every rupee counts! 💰",
           "Save smart, earn big! 📈",
           "Your goal is within reach! 🎯",
           "Financial discipline wins! 💪",
-          "Keep saving! You're awesome! 🌟"
+          "Keep saving! You're awesome! 🌟",
         ];
         alert(messages[Math.floor(Math.random() * messages.length)]);
       }

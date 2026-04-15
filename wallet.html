@@ -1,0 +1,685 @@
+<!doctype html>
+<html>
+  <head>
+    <title>My E-Wallet - Hustle Theory</title>
+    <link rel="stylesheet" href="assets/css/style.css" />
+    <style>
+      .wallet-container {
+        max-width: 800px;
+        margin: 40px auto;
+        padding: 20px;
+      }
+
+      .wallet-display {
+        background: linear-gradient(135deg, #667eea, #764ba2);
+        color: white;
+        padding: 40px;
+        border-radius: 20px;
+        text-align: center;
+        margin-bottom: 30px;
+        box-shadow: 0 10px 30px rgba(102, 126, 234, 0.3);
+      }
+
+      .wallet-display h2 {
+        margin: 0;
+        font-size: 18px;
+        opacity: 0.9;
+      }
+
+      .wallet-amount {
+        font-size: 48px;
+        font-weight: bold;
+        margin: 15px 0;
+      }
+
+      .currency {
+        font-size: 28px;
+        margin-left: 10px;
+      }
+
+      .wallet-actions {
+        display: flex;
+        gap: 15px;
+        margin-bottom: 30px;
+      }
+
+      .wallet-actions button {
+        flex: 1;
+        padding: 15px;
+        border: none;
+        border-radius: 15px;
+        font-size: 16px;
+        font-weight: bold;
+        cursor: pointer;
+        transition: all 0.3s ease;
+      }
+
+      .btn-add {
+        background: linear-gradient(135deg, #00f2fe, #4facfe);
+        color: white;
+      }
+
+      .btn-add:hover {
+        transform: scale(1.05);
+        box-shadow: 0 8px 20px rgba(79, 172, 254, 0.4);
+      }
+
+      .btn-spend {
+        background: linear-gradient(135deg, #f093fb, #f5576c);
+        color: white;
+      }
+
+      .btn-spend:hover {
+        transform: scale(1.05);
+        box-shadow: 0 8px 20px rgba(245, 87, 108, 0.4);
+      }
+
+      .modal {
+        display: none;
+        position: fixed;
+        z-index: 1000;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.6);
+        align-items: center;
+        justify-content: center;
+      }
+
+      .modal.active {
+        display: flex;
+      }
+
+      .modal-dialog {
+        background: white;
+        padding: 30px;
+        border-radius: 20px;
+        max-width: 400px;
+        width: 90%;
+        box-shadow: 0 15px 40px rgba(0, 0, 0, 0.3);
+      }
+
+      .modal-dialog h3 {
+        margin-top: 0;
+        color: #667eea;
+        font-size: 24px;
+      }
+
+      .form-group {
+        margin-bottom: 20px;
+      }
+
+      .form-group label {
+        display: block;
+        margin-bottom: 8px;
+        font-weight: bold;
+        color: #667eea;
+      }
+
+      .form-group input,
+      .form-group textarea {
+        width: 100%;
+        padding: 10px;
+        border: 2px solid #d0deff;
+        border-radius: 8px;
+        font-size: 16px;
+        font-family: inherit;
+      }
+
+      .form-group textarea {
+        resize: vertical;
+        min-height: 80px;
+      }
+
+      .modal-buttons {
+        display: flex;
+        gap: 10px;
+      }
+
+      .modal-buttons button {
+        flex: 1;
+        padding: 12px;
+        border: none;
+        border-radius: 10px;
+        font-weight: bold;
+        cursor: pointer;
+        transition: all 0.3s ease;
+      }
+
+      .btn-submit {
+        background: linear-gradient(135deg, #667eea, #764ba2);
+        color: white;
+      }
+
+      .btn-submit:hover {
+        transform: scale(1.05);
+      }
+
+      .btn-cancel {
+        background: #f0f4ff;
+        color: #667eea;
+      }
+
+      .btn-cancel:hover {
+        background: #e8ecff;
+      }
+
+      .close {
+        color: #667eea;
+        float: right;
+        font-size: 28px;
+        font-weight: bold;
+        cursor: pointer;
+        transition: all 0.3s ease;
+      }
+
+      .close:hover {
+        color: #764ba2;
+      }
+
+      .history-section {
+        background: white;
+        padding: 20px;
+        border-radius: 15px;
+        box-shadow: 0 6px 20px rgba(0, 0, 0, 0.1);
+      }
+
+      .history-section h3 {
+        color: #667eea;
+        margin-top: 0;
+      }
+
+      .sort-options {
+        margin-bottom: 20px;
+        display: flex;
+        gap: 10px;
+      }
+
+      .sort-options button {
+        padding: 10px 20px;
+        border: 2px solid #d0deff;
+        background: white;
+        color: #667eea;
+        border-radius: 10px;
+        cursor: pointer;
+        font-weight: bold;
+        transition: all 0.3s ease;
+      }
+
+      .sort-options button.active {
+        background: #667eea;
+        color: white;
+      }
+
+      .sort-options button:hover {
+        background: #f0f4ff;
+      }
+
+      .transaction {
+        padding: 15px;
+        margin-bottom: 10px;
+        border-left: 4px solid #d0deff;
+        border-radius: 8px;
+        background: #f9f9ff;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      }
+
+      .transaction.added {
+        border-left-color: #00f2fe;
+        background: #e0f7ff;
+      }
+
+      .transaction.spent {
+        border-left-color: #f5576c;
+        background: #ffe0e6;
+      }
+
+      .transaction-info {
+        flex: 1;
+      }
+
+      .transaction-type {
+        font-weight: bold;
+        margin-bottom: 5px;
+      }
+
+      .transaction-type.added {
+        color: #00a8cc;
+      }
+
+      .transaction-type.spent {
+        color: #c41e3a;
+      }
+
+      .transaction-reason {
+        font-size: 14px;
+        color: #666;
+        margin-bottom: 5px;
+      }
+
+      .transaction-date {
+        font-size: 12px;
+        color: #999;
+      }
+
+      .transaction-amount {
+        font-size: 20px;
+        font-weight: bold;
+        text-align: right;
+      }
+
+      .transaction-amount.added {
+        color: #00a8cc;
+      }
+
+      .transaction-amount.added:before {
+        content: "+";
+      }
+
+      .transaction-amount.spent {
+        color: #c41e3a;
+      }
+
+      .transaction-amount.spent:before {
+        content: "-";
+      }
+
+      .empty-message {
+        text-align: center;
+        padding: 40px;
+        color: #999;
+      }
+
+      .success-message {
+        background: #e0f7ff;
+        color: #00a8cc;
+        padding: 15px;
+        border-radius: 10px;
+        margin-bottom: 20px;
+        text-align: center;
+        font-weight: bold;
+      }
+
+      .error-message {
+        background: #ffe0e6;
+        color: #c41e3a;
+        padding: 15px;
+        border-radius: 10px;
+        margin-bottom: 20px;
+        text-align: center;
+        font-weight: bold;
+      }
+    </style>
+  </head>
+
+  <body class="dashboard-page">
+    <!-- Navbar -->
+    <div class="navbar">
+      <div><b>Hustle Theory</b></div>
+      <div class="nav-links">
+        <a href="index.html#home" class="nav-center">Home</a>
+        <a href="index.html#progress">Progress</a>
+        <a href="index.html#modules">Modules</a>
+        <a href="index.html#rewards">Rewards</a>
+        <a href="wallet.html" class="active">E-Wallet</a>
+        <a href="tracker.html">Tracker</a>
+        <button onclick="logout()">Logout</button>
+      </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="wallet-container">
+      <!-- Wallet Display -->
+      <div class="wallet-display">
+        <h2>💰 My E-Wallet</h2>
+        <div class="wallet-amount">
+          ₹<span id="walletBalance">0</span>
+          <span class="currency">💳</span>
+        </div>
+        <p id="walletStatus">Loading wallet...</p>
+      </div>
+
+      <!-- Action Buttons -->
+      <div class="wallet-actions">
+        <button class="btn-add" onclick="openAddModal()">💵 Add Money</button>
+        <button class="btn-spend" onclick="openSpendModal()">
+          💸 Spend Money
+        </button>
+      </div>
+
+      <!-- Messages -->
+      <div id="successMessage"></div>
+      <div id="errorMessage"></div>
+
+      <!-- Transaction History -->
+      <div class="history-section">
+        <h3>📜 Transaction History</h3>
+
+        <div class="sort-options">
+          <button class="active" onclick="sortTransactions('all')" id="btnAll">
+            All Transactions
+          </button>
+          <button onclick="sortTransactions('added')" id="btnAdded">
+            💰 Added
+          </button>
+          <button onclick="sortTransactions('spent')" id="btnSpent">
+            💸 Spent
+          </button>
+        </div>
+
+        <div id="transactionList"></div>
+      </div>
+    </div>
+
+    <!-- Add Money Modal -->
+    <div id="addModal" class="modal">
+      <div class="modal-dialog">
+        <span class="close" onclick="closeAddModal()">&times;</span>
+        <h3>💰 Add Money</h3>
+        <div class="form-group">
+          <label>Amount (₹)</label>
+          <input
+            type="number"
+            id="addAmount"
+            placeholder="Enter amount"
+            step="0.01"
+            min="0"
+          />
+        </div>
+        <div class="form-group">
+          <label>How did you get this money?</label>
+          <textarea
+            id="addReason"
+            placeholder="e.g., Allowance from parents, Gift from aunt, Saved from chores..."
+          ></textarea>
+        </div>
+        <div class="modal-buttons">
+          <button class="btn-submit" onclick="submitAddMoney()">
+            Add Money
+          </button>
+          <button class="btn-cancel" onclick="closeAddModal()">Cancel</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Spend Money Modal -->
+    <div id="spendModal" class="modal">
+      <div class="modal-dialog">
+        <span class="close" onclick="closeSpendModal()">&times;</span>
+        <h3>💸 Spend Money</h3>
+        <div class="form-group">
+          <label>Amount (₹)</label>
+          <input
+            type="number"
+            id="spendAmount"
+            placeholder="Enter amount"
+            step="0.01"
+            min="0"
+          />
+        </div>
+        <div class="form-group">
+          <label>What did you spend it on?</label>
+          <textarea
+            id="spendReason"
+            placeholder="e.g., Bought books, Movie ticket, Food, Games..."
+          ></textarea>
+        </div>
+        <div class="modal-buttons">
+          <button class="btn-submit" onclick="submitSpendMoney()">
+            Spend Money
+          </button>
+          <button class="btn-cancel" onclick="closeSpendModal()">Cancel</button>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      const API_URL = "http://localhost:5000/api";
+      let userId = parseInt(localStorage.getItem("userId")) || null;
+      let user = localStorage.getItem("loggedInUser");
+      let currentSort = "all";
+      let allTransactions = [];
+
+      // Check if user is logged in
+      if (!user || !userId) {
+        window.location.href = "auth.html";
+      }
+
+      // Load wallet on page load
+      window.onload = function () {
+        loadWallet();
+      };
+
+      function logout() {
+        localStorage.removeItem("loggedInUser");
+        localStorage.removeItem("userId");
+        window.location.href = "auth.html";
+      }
+
+      async function loadWallet() {
+        try {
+          const response = await fetch(`${API_URL}/wallet/${userId}`);
+          const data = await response.json();
+
+          document.getElementById("walletBalance").innerText =
+            data.balance.toFixed(2);
+          document.getElementById("walletStatus").innerText =
+            "Your current balance";
+
+          allTransactions = data.transactions;
+          displayTransactions("all");
+        } catch (error) {
+          console.log("Error loading wallet:", error);
+          showError("Could not load wallet data");
+        }
+      }
+
+      function openAddModal() {
+        document.getElementById("addModal").classList.add("active");
+      }
+
+      function closeAddModal() {
+        document.getElementById("addModal").classList.remove("active");
+        document.getElementById("addAmount").value = "";
+        document.getElementById("addReason").value = "";
+      }
+
+      function openSpendModal() {
+        document.getElementById("spendModal").classList.add("active");
+      }
+
+      function closeSpendModal() {
+        document.getElementById("spendModal").classList.remove("active");
+        document.getElementById("spendAmount").value = "";
+        document.getElementById("spendReason").value = "";
+      }
+
+      async function submitAddMoney() {
+        const amount = parseFloat(document.getElementById("addAmount").value);
+        const reason = document.getElementById("addReason").value.trim();
+
+        if (!amount || amount <= 0) {
+          showError("Please enter a valid amount!");
+          return;
+        }
+
+        if (!reason) {
+          showError("Please tell us how you got this money!");
+          return;
+        }
+
+        try {
+          const response = await fetch(`${API_URL}/wallet/add`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              user_id: userId,
+              amount: amount,
+              reason: reason,
+            }),
+          });
+
+          const data = await response.json();
+
+          if (response.ok) {
+            closeAddModal();
+            loadWallet();
+            showSuccess(
+              `🎉 Great! You added ₹${amount.toFixed(2)}! ${getCheerfulMessage()}`,
+            );
+          } else {
+            showError(data.error || "Failed to add money");
+          }
+        } catch (error) {
+          showError("Error adding money: " + error);
+        }
+      }
+
+      async function submitSpendMoney() {
+        const amount = parseFloat(document.getElementById("spendAmount").value);
+        const reason = document.getElementById("spendReason").value.trim();
+
+        if (!amount || amount <= 0) {
+          showError("Please enter a valid amount!");
+          return;
+        }
+
+        if (!reason) {
+          showError("Please tell us what you spent it on!");
+          return;
+        }
+
+        try {
+          const response = await fetch(`${API_URL}/wallet/spend`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              user_id: userId,
+              amount: amount,
+              reason: reason,
+            }),
+          });
+
+          const data = await response.json();
+
+          if (response.ok) {
+            closeSpendModal();
+            loadWallet();
+            showSuccess(
+              `✅ Tracked spending of ₹${amount.toFixed(2)}! Smart spending! 💡`,
+            );
+          } else {
+            showError(data.error || "Failed to spend money");
+          }
+        } catch (error) {
+          showError("Error spending money: " + error);
+        }
+      }
+
+      function getCheerfulMessage() {
+        const messages = [
+          "Keep saving! 💪",
+          "You're building wealth! 🚀",
+          "Every rupee counts! 💎",
+          "Awesome! Keep it up! 🌟",
+          "You're getting richer! 💰",
+        ];
+        return messages[Math.floor(Math.random() * messages.length)];
+      }
+
+      function displayTransactions(type) {
+        currentSort = type;
+        const filtered =
+          type === "all"
+            ? allTransactions
+            : allTransactions.filter((t) => t.transaction_type === type);
+
+        const listDiv = document.getElementById("transactionList");
+
+        if (filtered.length === 0) {
+          listDiv.innerHTML =
+            '<div class="empty-message">No transactions yet. Start adding or spending money! 💳</div>';
+          return;
+        }
+
+        listDiv.innerHTML = filtered
+          .map((t) => {
+            const date = new Date(t.created_at).toLocaleDateString("en-IN", {
+              year: "numeric",
+              month: "short",
+              day: "numeric",
+              hour: "2-digit",
+              minute: "2-digit",
+            });
+
+            return `
+          <div class="transaction ${t.transaction_type}">
+            <div class="transaction-info">
+              <div class="transaction-type ${t.transaction_type}">
+                ${
+                  t.transaction_type === "added"
+                    ? "💰 Money Added"
+                    : "💸 Money Spent"
+                }
+              </div>
+              <div class="transaction-reason">${t.reason}</div>
+              <div class="transaction-date">${date}</div>
+            </div>
+            <div class="transaction-amount ${t.transaction_type}">
+              ₹${t.amount.toFixed(2)}
+            </div>
+          </div>
+        `;
+          })
+          .join("");
+      }
+
+      function sortTransactions(type) {
+        // Update button styles
+        document.getElementById("btnAll").classList.remove("active");
+        document.getElementById("btnAdded").classList.remove("active");
+        document.getElementById("btnSpent").classList.remove("active");
+
+        if (type === "all")
+          document.getElementById("btnAll").classList.add("active");
+        else if (type === "added")
+          document.getElementById("btnAdded").classList.add("active");
+        else document.getElementById("btnSpent").classList.add("active");
+
+        displayTransactions(type);
+      }
+
+      function showSuccess(message) {
+        const div = document.getElementById("successMessage");
+        div.innerHTML = `<div class="success-message">${message}</div>`;
+        setTimeout(() => {
+          div.innerHTML = "";
+        }, 4000);
+      }
+
+      function showError(message) {
+        const div = document.getElementById("errorMessage");
+        div.innerHTML = `<div class="error-message">❌ ${message}</div>`;
+        setTimeout(() => {
+          div.innerHTML = "";
+        }, 4000);
+      }
+
+      // Close modals on outside click
+      window.onclick = function (event) {
+        const addModal = document.getElementById("addModal");
+        const spendModal = document.getElementById("spendModal");
+
+        if (event.target === addModal) {
+          closeAddModal();
+        }
+        if (event.target === spendModal) {
+          closeSpendModal();
+        }
+      };
+    </script>
+  </body>
+</html>

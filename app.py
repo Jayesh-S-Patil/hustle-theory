@@ -26,6 +26,7 @@ def init_db():
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             username TEXT UNIQUE NOT NULL,
             password TEXT NOT NULL,
+            wallet_balance REAL DEFAULT 0,
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         )
     ''')
@@ -67,6 +68,19 @@ def init_db():
             user_id INTEGER NOT NULL,
             badge_name TEXT NOT NULL,
             earned_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            FOREIGN KEY (user_id) REFERENCES users (id)
+        )
+    ''')
+    
+    # Wallet transactions table (NEW)
+    cursor.execute('''
+        CREATE TABLE IF NOT EXISTS wallet_transactions (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            user_id INTEGER NOT NULL,
+            amount REAL NOT NULL,
+            transaction_type TEXT NOT NULL,
+            reason TEXT NOT NULL,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
             FOREIGN KEY (user_id) REFERENCES users (id)
         )
     ''')
@@ -294,6 +308,118 @@ def award_badge():
     conn.close()
     
     return jsonify({'message': 'Badge awarded successfully'}), 201
+
+# ========== E-WALLET ROUTES ==========
+
+@app.route('/api/wallet/<int:user_id>', methods=['GET'])
+def get_wallet(user_id):
+    """Get user's wallet balance and transactions"""
+    conn = get_db()
+    cursor = conn.cursor()
+    
+    # Get wallet balance
+    cursor.execute('SELECT wallet_balance FROM users WHERE id = ?', (user_id,))
+    user = cursor.fetchone()
+    balance = user['wallet_balance'] if user else 0
+    
+    # Get all transactions
+    cursor.execute('''
+        SELECT id, amount, transaction_type, reason, created_at 
+        FROM wallet_transactions 
+        WHERE user_id = ? 
+        ORDER BY created_at DESC
+    ''', (user_id,))
+    
+    transactions = [dict(row) for row in cursor.fetchall()]
+    conn.close()
+    
+    return jsonify({'balance': balance, 'transactions': transactions}), 200
+
+@app.route('/api/wallet/add', methods=['POST'])
+def add_money():
+    """Add money to wallet"""
+    data = request.json
+    user_id = data.get('user_id')
+    amount = float(data.get('amount', 0))
+    reason = data.get('reason')
+    
+    if amount <= 0:
+        return jsonify({'error': 'Amount must be greater than 0'}), 400
+    
+    conn = get_db()
+    cursor = conn.cursor()
+    
+    # Add transaction
+    cursor.execute('''
+        INSERT INTO wallet_transactions (user_id, amount, transaction_type, reason)
+        VALUES (?, ?, ?, ?)
+    ''', (user_id, amount, 'added', reason))
+    
+    # Update balance
+    cursor.execute('''
+        UPDATE users SET wallet_balance = wallet_balance + ? WHERE id = ?
+    ''', (amount, user_id))
+    
+    conn.commit()
+    
+    # Get updated balance
+    cursor.execute('SELECT wallet_balance FROM users WHERE id = ?', (user_id,))
+    new_balance = cursor.fetchone()['wallet_balance']
+    
+    conn.close()
+    
+    return jsonify({
+        'message': 'Money added successfully!',
+        'balance': new_balance,
+        'amount': amount
+    }), 200
+
+@app.route('/api/wallet/spend', methods=['POST'])
+def spend_money():
+    """Spend money from wallet"""
+    data = request.json
+    user_id = data.get('user_id')
+    amount = float(data.get('amount', 0))
+    reason = data.get('reason')
+    
+    if amount <= 0:
+        return jsonify({'error': 'Amount must be greater than 0'}), 400
+    
+    conn = get_db()
+    cursor = conn.cursor()
+    
+    # Check balance
+    cursor.execute('SELECT wallet_balance FROM users WHERE id = ?', (user_id,))
+    user = cursor.fetchone()
+    
+    if user['wallet_balance'] < amount:
+        conn.close()
+        return jsonify({'error': 'Insufficient balance'}), 400
+    
+    # Add transaction
+    cursor.execute('''
+        INSERT INTO wallet_transactions (user_id, amount, transaction_type, reason)
+        VALUES (?, ?, ?, ?)
+    ''', (user_id, amount, 'spent', reason))
+    
+    # Update balance
+    cursor.execute('''
+        UPDATE users SET wallet_balance = wallet_balance - ? WHERE id = ?
+    ''', (amount, user_id))
+    
+    conn.commit()
+    
+    # Get updated balance
+    cursor.execute('SELECT wallet_balance FROM users WHERE id = ?', (user_id,))
+    new_balance = cursor.fetchone()['wallet_balance']
+    
+    conn.close()
+    
+    return jsonify({
+        'message': 'Money spent successfully!',
+        'balance': new_balance,
+        'amount': amount
+    }), 200
 
 if __name__ == '__main__':
     app.run(debug=True, port=5000)

@@ -121,40 +121,124 @@
 
     <script src="assets/js/dashboard.js"></script>
     <script>
+      // Kid-friendly content filter
+      function isKidFriendly(text) {
+        // Inappropriate words to filter
+        const bannedWords = [
+          "damn",
+          "hell",
+          "crap",
+          "ass",
+          "shit",
+          "fuck",
+          "bitch",
+          "bastard",
+          "dick",
+          "pussy",
+          "whore",
+          "slut",
+          "cunt",
+          "cock",
+          "piss",
+          "suck",
+          "sex",
+          "porn",
+          "xxx",
+          "adult",
+          "kill",
+          "death",
+          "die",
+          "suicide",
+          "drug",
+          "alcohol",
+          "cigarette",
+          "cocaine",
+          "heroin",
+          "weed",
+          "marijuana",
+        ];
+
+        const lowerText = text.toLowerCase();
+
+        // Check if any banned words are in the text
+        for (let word of bannedWords) {
+          if (lowerText.includes(word)) {
+            return false;
+          }
+        }
+
+        // Check length - advice should be reasonable
+        if (text.length > 500) {
+          return false;
+        }
+
+        return true;
+      }
+
       // Call Advice Slip API directly from JavaScript
       async function showFinancialFact() {
+        let advice = null;
+        let attempts = 0;
+        const maxAttempts = 5; // Try up to 5 times to get clean advice
+
         try {
-          const response = await fetch('https://api.adviceslip.com/advice');
-          const data = await response.json();
-          
-          document.getElementById('factText').innerText = data.slip.advice;
-          document.getElementById('factModal').style.display = 'flex';
+          // Keep fetching until we get kid-friendly advice
+          while (attempts < maxAttempts && !advice) {
+            const response = await fetch("https://api.adviceslip.com/advice");
+            const data = await response.json();
+
+            if (isKidFriendly(data.slip.advice)) {
+              advice = data.slip.advice;
+            }
+
+            attempts++;
+          }
+
+          // If we got clean advice, show it
+          if (advice) {
+            document.getElementById("factText").innerText = advice;
+            document.getElementById("factModal").style.display = "flex";
+          } else {
+            // Use fallback if we couldn't get clean advice
+            throw new Error("Could not get appropriate advice");
+          }
         } catch (error) {
-          console.log('Could not fetch advice');
+          console.log("Using fallback advice");
           const fallbackAdvice = [
             "The best time to plant a tree was 20 years ago. The second best time is now.",
             "You're not as bad as you think you are.",
             "Don't forget to smile today!",
             "Success is not final, failure is not fatal.",
-            "The only way to do great work is to love what you do."
+            "The only way to do great work is to love what you do.",
+            "Every expert was once a beginner.",
+            "Your potential is endless.",
+            "Small progress is still progress.",
+            "Today is a good day to learn something new.",
+            "Be kind to yourself and others.",
+            "Mistakes are how we learn and grow.",
+            "You have the power to change your life.",
+            "Great things take time.",
+            "Your hard work will pay off.",
+            "Believe in yourself and your dreams.",
           ];
-          const randomAdvice = fallbackAdvice[Math.floor(Math.random() * fallbackAdvice.length)];
-          document.getElementById('factText').innerText = randomAdvice;
-          document.getElementById('factModal').style.display = 'flex';
+          const randomAdvice =
+            fallbackAdvice[Math.floor(Math.random() * fallbackAdvice.length)];
+          document.getElementById("factText").innerText = randomAdvice;
+          document.getElementById("factModal").style.display = "flex";
         }
       }
 
       function closeFactModal() {
-        document.getElementById('factModal').style.display = 'none';
+        document.getElementById("factModal").style.display = "none";
       }
 
       // Close modal when clicking outside
-      window.onclick = function(event) {
-        const modal = document.getElementById('factModal');
+      window.onclick = function (event) {
+        const modal = document.getElementById("factModal");
         if (event.target === modal) {
-          modal.style.display = 'none';
+          modal.style.display = "none";
         }
-      }
+      };
     </script>
   </body>
 </html>
